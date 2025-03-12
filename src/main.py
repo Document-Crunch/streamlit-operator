@@ -1,5 +1,6 @@
 import kopf
 import kubernetes
+import os
 
 from src.templating import template_deployment, template_service, template_ingress
 import yaml
@@ -15,32 +16,48 @@ def configure(settings: kopf.OperatorSettings, **_):
     logging.info(f"Loaded config: {config}")
     login = kubernetes.config.load_incluster_config()
     client = kubernetes.client.CustomObjectsApi()
-
-    client.create_namespaced_custom_object(
-        group="fetch.com",
-        version="v1",
-        namespace="streamlit",
-        plural="streamlit-apps",
-        body={
-            "apiVersion": "fetch.com/v1",
-            "kind": "StreamlitApp",
-            "metadata": {
-                "name": "hub",
-                "namespace": "streamlit",
+    
+    # Get the current namespace from the environment
+    namespace = os.environ.get("NAMESPACE", "streamlit")
+    
+    try:
+        client.create_namespaced_custom_object(
+            group="fetch.com",
+            version="v1",
+            namespace=namespace,
+            plural="streamlit-apps",
+            body={
+                "apiVersion": "fetch.com/v1",
+                "kind": "StreamlitApp",
+                "metadata": {
+                    "name": "hub",
+                    "namespace": namespace,
+                },
+                "spec": {
+                    "repo": "https://github.com/fetch-rewards/streamlit-operator.git",
+                    "branch": "main",
+                    "code_dir": "streamlit-hub",
+                },
             },
-            "spec": {
-                "repo": "https://github.com/fetch-rewards/streamlit-operator.git",
-                "branch": "main",
-                "code_dir": "streamlit-hub",
-            },
-        },
-    )
+        )
+        logging.info("Created hub StreamlitApp successfully")
+    except kubernetes.client.exceptions.ApiException as e:
+        if e.status == 409:
+            # Resource already exists, this is fine
+            logging.info("Hub StreamlitApp already exists, skipping creation")
+        else:
+            # Re-raise other API exceptions
+            logging.error(f"Failed to create hub StreamlitApp: {e}")
+            raise
+    except Exception as e:
+        logging.error(f"Failed to create custom object: {e}")
 
 
 @kopf.on.create('streamlit-apps')
 def create_fn(spec, name, namespace, logger, **kwargs):
-    # Override the namespace, since the operator won't have permissions to create the apps anywhere else anyway
-    namespace = "streamlit"
+    # Get the current namespace from the environment instead of hardcoding
+    namespace = os.environ.get("NAMESPACE", "streamlit")
+    logger.info(f"Using namespace: {namespace}")
 
     # Get params from spec
     repo = spec.get('repo', None)

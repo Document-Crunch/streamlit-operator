@@ -37,6 +37,11 @@ def template_deployment(name, repo, branch, code_dir):
                                 {
                                     "name": "code",
                                     "mountPath": "/tmp/code"
+                                },
+                                {
+                                    "name": "github-key",
+                                    "mountPath": "/etc/github",
+                                    "readOnly": True
                                 }
                             ],
                             "env": [
@@ -45,7 +50,23 @@ def template_deployment(name, repo, branch, code_dir):
                                 {"name": "GIT_SYNC_ROOT", "value": "/tmp/code"},
                                 {"name": "GIT_SYNC_DEST", "value": "repo"},
                                 {"name": "GIT_KNOWN_HOSTS", "value": "false"},
-                                {"name": "GIT_SYNC_WAIT", "value": "60"}
+                                {"name": "GIT_SYNC_WAIT", "value": "60"},
+                                {"name": "GIT_SYNC_SSH", "value": "false"},
+                                {"name": "GITSYNC_GITHUB_APP_APPLICATION_ID", 
+                                 "valueFrom": {
+                                     "secretKeyRef": {
+                                         "name": "github-app-credentials",
+                                         "key": "App-Id"
+                                     }
+                                 }},
+                                {"name": "GITSYNC_GITHUB_APP_CLIENT_ID", 
+                                 "valueFrom": {
+                                     "secretKeyRef": {
+                                         "name": "github-app-credentials",
+                                         "key": "Client-Id"
+                                     }
+                                 }},
+                                {"name": "GITSYNC_GITHUB_APP_PRIVATE_KEY_FILE", "value": "/etc/github/private-key.pem"}
                             ]
                         },
                         {
@@ -71,6 +92,19 @@ def template_deployment(name, repo, branch, code_dir):
                             "configMap": {
                                 "name": "streamlit-launch-script",
                                 "defaultMode": 0o500
+                            }
+                        },
+                        {
+                            "name": "github-key",
+                            "secret": {
+                                "secretName": "github-app-credentials",
+                                "items": [
+                                    {
+                                        "key": "streamlit-operator.pem",
+                                        "path": "private-key.pem",
+                                        "mode": 0o400
+                                    }
+                                ]
                             }
                         }
                     ]

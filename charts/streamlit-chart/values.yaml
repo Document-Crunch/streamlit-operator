@@ -1,5 +1,20 @@
-#baseDnsRecord: "this-is-a-test"
+baseDnsRecord: sl.ml.documentcruncn.com
 #ingressAnnotations:
 #  annotation1: "value1"
 #  annotation2: "value2"
 suffix: "-streamlit"
+
+# GitHub App configuration
+githubApp:
+  enabled: true
+  # Repository URL to clone
+  repoUrl: "https://github.com/fetch-rewards/streamlit-operator.git"
+  # Branch to clone
+  branch: "main"
+  # 1Password integration
+  onePassword:
+    enabled: true
+    # 1Password vault name containing the GitHub App credentials
+    vault: "Dev Secrets"
+    # Item name in the vault
+    item: "Streamlit-Operator-Github-App"
