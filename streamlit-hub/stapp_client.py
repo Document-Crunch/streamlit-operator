@@ -13,7 +13,7 @@ class StappClient:
     def list_streamlit_apps(self):
         # List instances of the custom resource
         custom_resource_list = self.api.list_namespaced_custom_object(
-            group="fetch.com",
+            group="document-crunch.com",
             version="v1",
             namespace="streamlit",
             plural="streamlit-apps"
@@ -28,12 +28,12 @@ class StappClient:
     def create_streamlit_app(self, name, repo, branch, code_dir):
         # Create the custom resource
         self.api.create_namespaced_custom_object(
-            group="fetch.com",
+            group="document-crunch.com",
             version="v1",
             namespace="streamlit",
             plural="streamlit-apps",
             body={
-                "apiVersion": "fetch.com/v1",
+                "apiVersion": "document-crunch.com/v1",
                 "kind": "StreamlitApp",
                 "metadata": {
                     "name": name
@@ -49,7 +49,7 @@ class StappClient:
     def delete_streamlit_app(self, name):
         # Delete the custom resource
         self.api.delete_namespaced_custom_object(
-            group="fetch.com",
+            group="document-crunch.com",
             version="v1",
             namespace="streamlit",
             plural="streamlit-apps",

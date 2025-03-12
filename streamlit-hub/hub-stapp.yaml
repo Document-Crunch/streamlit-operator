@@ -1,9 +1,9 @@
-apiVersion: fetch.com/v1
+apiVersion: document-crunch.com/v1
 kind: StreamlitApp
 metadata:
   name: hub
-  namespace: streamlit
+  namespace: {{ .Release.Namespace }}
 spec:
-  repo: https://github.com/fetch-rewards/streamlit-operator.git
+  repo: https://github.com/document-crunch/streamlit-operator.git
   branch: main
   code_dir: streamlit-hub

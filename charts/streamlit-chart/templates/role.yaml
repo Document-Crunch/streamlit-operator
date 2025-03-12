@@ -25,7 +25,7 @@ rules:
     verbs: [create, patch]
 
   # Application: read-only access for watching cluster-wide.
-  - apiGroups: [fetch.com]
+  - apiGroups: [document-crunch.com]
     resources: [streamlit-apps]
     verbs: [list, watch, create, update, patch, delete]
 ---
@@ -42,7 +42,7 @@ rules:
     verbs: [create]
 
   # Application: watching & handling for the custom resource we declare.
-  - apiGroups: [fetch.com]
+  - apiGroups: [document-crunch.com]
     resources: [streamlit-apps]
     verbs: [list, watch, patch, create, update, delete]
 

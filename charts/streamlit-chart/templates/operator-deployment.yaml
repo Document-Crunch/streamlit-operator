@@ -22,7 +22,7 @@ spec:
           image: registry.k8s.io/git-sync/git-sync:v3.6.9
           env:
             - name: GIT_SYNC_REPO
-              value: {{ .Values.githubApp.repoUrl | default "https://github.com/fetch-rewards/streamlit-operator.git" }}
+              value: {{ .Values.githubApp.repoUrl | default "https://github.com/document-crunch/streamlit-operator.git" }}
             - name: GIT_SYNC_BRANCH
               value: {{ .Values.githubApp.branch | default "main" }}
             - name: GIT_SYNC_ROOT

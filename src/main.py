@@ -22,19 +22,19 @@ def configure(settings: kopf.OperatorSettings, **_):
     
     try:
         client.create_namespaced_custom_object(
-            group="fetch.com",
+            group="document-crunch.com",
             version="v1",
             namespace=namespace,
             plural="streamlit-apps",
             body={
-                "apiVersion": "fetch.com/v1",
+                "apiVersion": "document-crunch.com/v1",
                 "kind": "StreamlitApp",
                 "metadata": {
                     "name": "hub",
                     "namespace": namespace,
                 },
                 "spec": {
-                    "repo": "https://github.com/fetch-rewards/streamlit-operator.git",
+                    "repo": "https://github.com/document-crunch/streamlit-operator.git",
                     "branch": "main",
                     "code_dir": "streamlit-hub",
                 },
