@@ -19,13 +19,13 @@ spec:
       
       initContainers:
         - name: git-sync
-          image: registry.k8s.io/git-sync/git-sync:v3.6.9
+          image:  registry.k8s.io/git-sync/git-sync:v4.4.0
           env:
-            - name: GIT_SYNC_REPO
+            - name: GITSYNC_REPO
               value: {{ .Values.githubApp.repoUrl | default "https://github.com/document-crunch/streamlit-operator.git" }}
             - name: GIT_SYNC_BRANCH
               value: {{ .Values.githubApp.branch | default "main" }}
-            - name: GIT_SYNC_ROOT
+            - name: GITSYNC_ROOT
               value: /tmp/code
             - name: GIT_SYNC_DEST
               value: "repo"
@@ -33,25 +33,27 @@ spec:
               value: "true"
             - name: GIT_SYNC_SSH
               value: "false"
+            - name: GIT_SYNC_KNOWN_HOSTS
+              value: "false"
             # GitHub App authentication
             - name: GITSYNC_GITHUB_APP_APPLICATION_ID
               valueFrom:
                 secretKeyRef:
                   name: github-app-credentials
                   key: App-Id
-            - name: GITSYNC_GITHUB_APP_CLIENT_ID
+            - name: GITSYNC_GITHUB_APP_INSTALLATION_ID
               valueFrom:
                 secretKeyRef:
                   name: github-app-credentials
-                  key: Client-Id
-            - name: GITSYNC_GITHUB_APP_PRIVATE_KEY_FILE
-              value: /etc/github/private-key.pem
+                  key: Installation-Id
+            - name: GITSYNC_GITHUB_APP_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: github-app-credentials
+                  key: Private-Key
           volumeMounts:
             - name: code
               mountPath: /tmp/code
-            - name: github-key
-              mountPath: /etc/github
-              readOnly: true
       containers:
       - name: streamlit-operator
         image: python:3.8.5
@@ -79,10 +81,3 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-        - name: github-key
-          secret:
-            secretName: github-app-credentials
-            items:
-              - key: streamlit-operator.pem
-                path: private-key.pem
-                mode: 0400

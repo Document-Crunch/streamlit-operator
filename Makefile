@@ -25,10 +25,6 @@ help:
 	@echo "Available commands:"
 	@echo "  make install                   - Install Streamlit Operator with default values"
 	@echo "  make upgrade                   - Upgrade existing installation with default values"
-	@echo "  make install-values            - Install with custom values file (set VALUES_FILE=path/to/values.yaml)"
-	@echo "  make upgrade-values            - Upgrade with custom values file (set VALUES_FILE=path/to/values.yaml)"
-	@echo "  make template                  - Output rendered Helm templates for inspection"
-	@echo "  make rollback                  - Rollback to previous release"
 	@echo "  make uninstall                 - Uninstall Streamlit Operator"
 	@echo "  make lint                      - Lint the Helm chart"
 	@echo ""
@@ -37,7 +33,6 @@ help:
 	@echo "  RELEASE_NAME  - Helm release name (default: streamlit-operator)"
 	@echo "  VALUES_FILE   - Path to values file (default: values.yaml)"
 	@echo "  DEBUG         - Enable Helm debug output (default: false)"
-	@echo "  KUBE_CONTEXT  - Kubernetes context (default: current context)"
 	@echo ""
 
 # Install with default values

@@ -32,22 +32,17 @@ def template_deployment(name, repo, branch, code_dir):
                     "containers": [
                         {
                             "name": "git-sync",
-                            "image": "registry.k8s.io/git-sync:v3.1.3",
+                            "image": "registry.k8s.io/git-sync/git-sync:v4.4.0",
                             "volumeMounts": [
                                 {
                                     "name": "code",
                                     "mountPath": "/tmp/code"
-                                },
-                                {
-                                    "name": "github-key",
-                                    "mountPath": "/etc/github",
-                                    "readOnly": True
                                 }
                             ],
                             "env": [
-                                {"name": "GIT_SYNC_REPO", "value": f"{repo}"},
+                                {"name": "GITSYNC_REPO", "value": f"{repo}"},
                                 {"name": "GIT_SYNC_BRANCH", "value": f"{branch}"},
-                                {"name": "GIT_SYNC_ROOT", "value": "/tmp/code"},
+                                {"name": "GITSYNC_ROOT", "value": "/tmp/code"},
                                 {"name": "GIT_SYNC_DEST", "value": "repo"},
                                 {"name": "GIT_KNOWN_HOSTS", "value": "false"},
                                 {"name": "GIT_SYNC_WAIT", "value": "60"},
@@ -59,14 +54,20 @@ def template_deployment(name, repo, branch, code_dir):
                                          "key": "App-Id"
                                      }
                                  }},
-                                {"name": "GITSYNC_GITHUB_APP_CLIENT_ID", 
+                                {"name": "GITSYNC_GITHUB_APP_INSTALLATION_ID", 
                                  "valueFrom": {
                                      "secretKeyRef": {
                                          "name": "github-app-credentials",
-                                         "key": "Client-Id"
+                                            "key": "Installation-Id"
                                      }
                                  }},
-                                {"name": "GITSYNC_GITHUB_APP_PRIVATE_KEY_FILE", "value": "/etc/github/private-key.pem"}
+                                {"name": "GITSYNC_GITHUB_APP_PRIVATE_KEY", 
+                                 "valueFrom": {
+                                     "secretKeyRef": {
+                                         "name": "github-app-credentials",
+                                         "key": "Private-Key"
+                                     }
+                                 }}
                             ]
                         },
                         {
@@ -92,19 +93,6 @@ def template_deployment(name, repo, branch, code_dir):
                             "configMap": {
                                 "name": "streamlit-launch-script",
                                 "defaultMode": 0o500
-                            }
-                        },
-                        {
-                            "name": "github-key",
-                            "secret": {
-                                "secretName": "github-app-credentials",
-                                "items": [
-                                    {
-                                        "key": "streamlit-operator.pem",
-                                        "path": "private-key.pem",
-                                        "mode": 0o400
-                                    }
-                                ]
                             }
                         }
                     ]

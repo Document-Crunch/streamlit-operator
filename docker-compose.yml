@@ -1,0 +1,20 @@
+
+services:
+  git-sync:
+    image: registry.k8s.io/git-sync/git-sync:v4.4.0
+    environment:
+      - GITSYNC_REPO=${GIT_REPO:-https://github.com/your-private-repo.git}
+      - GIT_SYNC_BRANCH=${GIT_BRANCH:-main}
+      - GITSYNC_ROOT=/tmp/code
+      - GIT_SYNC_DEST=repo
+      - GIT_SYNC_WAIT=60
+      - GIT_SYNC_SSH=false
+      - GIT_SYNC_KNOWN_HOSTS=false
+      - GITSYNC_VERBOSE=9
+      # GitHub App authentication
+      - GITSYNC_GITHUB_APP_PRIVATE_KEY=${GITHUB_PRIVATE_KEY}
+      - GITSYNC_GITHUB_APP_APPLICATION_ID=${GITHUB_APP_ID}
+      - GITSYNC_GITHUB_APP_INSTALLATION_ID=${GITHUB_INSTALLATION_ID}
+    volumes:
+      - ./code:/tmp/code
+
