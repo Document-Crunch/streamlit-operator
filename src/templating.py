@@ -65,7 +65,7 @@ def template_deployment(name, repo, branch, code_dir):
                                  "valueFrom": {
                                      "secretKeyRef": {
                                          "name": "github-app-credentials",
-                                         "key": "Private-Key"
+                                         "key": "streamlit-operator.pem"
                                      }
                                  }}
                             ]

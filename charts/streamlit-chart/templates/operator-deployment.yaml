@@ -50,7 +50,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: github-app-credentials
-                  key: Private-Key
+                  key: streamlit-operator.pem
           volumeMounts:
             - name: code
               mountPath: /tmp/code
