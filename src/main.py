@@ -2,7 +2,7 @@ import kopf
 import kubernetes
 import os
 
-from src.templating import template_deployment, template_service, template_ingress
+from src.templating import template_deployment, template_service, template_ingress, template_secrets
 import yaml
 import logging
 
@@ -70,6 +70,10 @@ def create_fn(spec, name, namespace, logger, **kwargs):
         raise kopf.PermanentError(f"Branch must be set. Got {branch!r}.")
     if not code_dir:
         raise kopf.PermanentError(f"Code directory must be set. Got {code_dir!r}.")
+
+    # Template the secrets
+    secrets_data = template_secrets(name)
+    kopf.adopt(secrets_data)
 
     # Template the deployment
     deployment_data = template_deployment(name, repo, branch, code_dir)

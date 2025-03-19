@@ -3,6 +3,26 @@ import os
 import yaml
 
 
+def template_secrets(name):
+    secrets_dict = {
+        "apiVersion": "onepassword.com/v1",
+        "kind": "OnePasswordItem",
+        "metadata": {
+            "name": f"{name}-secrets",
+            "namespace": "streamlit", 
+            "labels": {
+                "app": f"{name}"
+            }
+        },
+        "spec": {
+            "itemPath": "dev-secrets",
+            "secretName": f"{name}-streamlit",
+            "secretType": "kubernetes.io/Opaque"
+        }
+    }
+    return secrets_dict
+
+
 def template_deployment(name, repo, branch, code_dir):
     deployment_dict = {
         "apiVersion": "apps/v1",
@@ -76,7 +96,14 @@ def template_deployment(name, repo, branch, code_dir):
                             "env": [
                                 {"name": "IN_HUB", "value": "True"},
                                 {"name": "CODE_DIR", "value": f"repo/{code_dir}"},
-                                {"name": "ENTRYPOINT", "value": "main.py"}
+                                {"name": "ENTRYPOINT", "value": "main.py"},  
+                            ],
+                            "envFrom": [
+                                {
+                                    "secretRef": {
+                                        "name": f"{name}-streamlit"
+                                    }
+                                }
                             ],
                             "command": ["/app/launch/launch.sh"],
                             "ports": [{"containerPort": 80}],
