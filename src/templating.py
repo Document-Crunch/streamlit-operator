@@ -126,7 +126,7 @@ def template_deployment(name, repo, branch, code_dir, has_secrets=False):
         deployment_dict["spec"]["template"]["spec"]["containers"][1]["envFrom"] = [
             {
                 "secretRef": {
-                    "name": f"{name}-streamlit"
+                    "name": f"{name}-secrets"
                 }
             }
         ]
