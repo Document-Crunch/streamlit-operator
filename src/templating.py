@@ -15,8 +15,8 @@ def template_secrets(name):
             }
         },
         "spec": {
-            "itemPath": "dev-secrets",
-            "secretName": f"{name}-streamlit",
+            "itemPath": "vaults/Dev Secrets/items/{name}-secrets",
+            "secretName": f"{name}-secrets",
             "secretType": "kubernetes.io/Opaque"
         }
     }
