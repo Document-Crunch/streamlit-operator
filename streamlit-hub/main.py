@@ -33,6 +33,7 @@ with st.sidebar:
     repo = st.text_input("Git Repo URL (EX: git@bitbucket.org\:<YOURCOMPANY>/<YOURPROJECT>.git)")
     branch = st.text_input("Git Branch (EX: feature/my-dev-branch)")
     code_dir = st.text_input("Code Directory (EX: src/streamlit-app)")
+    has_secrets = st.checkbox("Create with secrets", value=False, help="Check this if have 1password secrets for this app, with item name-secrets")
 
     #check that all fields are filled out
     if not app_name:
@@ -47,5 +48,5 @@ with st.sidebar:
     if app_name and repo and branch and code_dir:
         if st.button("Create Streamlit App"):
              # Create the custom resource
-            stapp_client.create_streamlit_app(app_name, repo, branch, code_dir)
+            stapp_client.create_streamlit_app(app_name, repo, branch, code_dir, has_secrets)
 

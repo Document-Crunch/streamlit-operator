@@ -25,7 +25,7 @@ class StappClient:
             outputs.append(name)
         return outputs
 
-    def create_streamlit_app(self, name, repo, branch, code_dir):
+    def create_streamlit_app(self, name, repo, branch, code_dir, has_secrets=False):
         # Create the custom resource
         self.api.create_namespaced_custom_object(
             group="document-crunch.com",
@@ -41,7 +41,8 @@ class StappClient:
                 "spec": {
                     "repo": repo,
                     "branch": branch,
-                    "code_dir": code_dir
+                    "code_dir": code_dir,
+                    "has_secrets": has_secrets
                 }
             }
         )

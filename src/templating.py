@@ -23,7 +23,7 @@ def template_secrets(name):
     return secrets_dict
 
 
-def template_deployment(name, repo, branch, code_dir):
+def template_deployment(name, repo, branch, code_dir, has_secrets=False):
     deployment_dict = {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
@@ -98,13 +98,6 @@ def template_deployment(name, repo, branch, code_dir):
                                 {"name": "CODE_DIR", "value": f"repo/{code_dir}"},
                                 {"name": "ENTRYPOINT", "value": "main.py"},  
                             ],
-                            "envFrom": [
-                                {
-                                    "secretRef": {
-                                        "name": f"{name}-streamlit"
-                                    }
-                                }
-                            ],
                             "command": ["/app/launch/launch.sh"],
                             "ports": [{"containerPort": 80}],
                             "volumeMounts": [
@@ -127,6 +120,17 @@ def template_deployment(name, repo, branch, code_dir):
             }
         }
     }
+    
+    # Add envFrom if has_secrets is True
+    if has_secrets:
+        deployment_dict["spec"]["template"]["spec"]["containers"][1]["envFrom"] = [
+            {
+                "secretRef": {
+                    "name": f"{name}-streamlit"
+                }
+            }
+        ]
+    
     return deployment_dict
 
 

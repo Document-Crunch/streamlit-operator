@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: streamlit-launch-script-config
+  name: streamlit-launch-script
   namespace: {{ .Release.Namespace }}
 data:
   launch.sh: |

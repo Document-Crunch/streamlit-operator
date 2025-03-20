@@ -37,6 +37,7 @@ def configure(settings: kopf.OperatorSettings, **_):
                     "repo": "https://github.com/document-crunch/streamlit-operator.git",
                     "branch": "main",
                     "code_dir": "streamlit-hub",
+                    "has_secrets": False,
                 },
             },
         )
@@ -63,6 +64,7 @@ def create_fn(spec, name, namespace, logger, **kwargs):
     repo = spec.get('repo', None)
     branch = spec.get('branch', None)
     code_dir = spec.get('code_dir', None)
+    has_secrets = spec.get('has_secrets', False)
 
     if not repo:
         raise kopf.PermanentError(f"Repo must be set. Got {repo!r}.")
@@ -71,13 +73,40 @@ def create_fn(spec, name, namespace, logger, **kwargs):
     if not code_dir:
         raise kopf.PermanentError(f"Code directory must be set. Got {code_dir!r}.")
 
-    # Template the secrets
-    secrets_data = template_secrets(name)
-    kopf.adopt(secrets_data)
+    api = kubernetes.client.CoreV1Api()
+    apps_api = kubernetes.client.AppsV1Api()
+    networking_api = kubernetes.client.NetworkingV1Api()
+    custom_api = kubernetes.client.CustomObjectsApi()
 
-    # Template the deployment
-    deployment_data = template_deployment(name, repo, branch, code_dir)
+    # Template the deployment with the has_secrets flag
+    deployment_data = template_deployment(name, repo, branch, code_dir, has_secrets)
     kopf.adopt(deployment_data)
+
+    # Create the secrets if has_secrets is True
+    if has_secrets:
+        # Template the secrets
+        secrets_data = template_secrets(name)
+        kopf.adopt(secrets_data)
+        try:
+            # Create the secret resource
+            custom_api.create_namespaced_custom_object(
+                group="onepassword.com",
+                version="v1",
+                namespace=namespace,
+                plural="onepassworditems",
+                body=secrets_data,
+            )
+            logger.info(f"Created secrets for {name}")
+        except kubernetes.client.exceptions.ApiException as e:
+            if e.status == 409:
+                # Secret already exists, this is fine
+                logger.info(f"Secret for {name} already exists, skipping creation")
+            else:
+                # Re-raise other API exceptions
+                logger.error(f"Failed to create secret for {name}: {e}")
+                raise
+        except Exception as e:
+            logger.error(f"Failed to create secret: {e}")
 
     # Template the service
     service_data = template_service(name)
@@ -87,9 +116,6 @@ def create_fn(spec, name, namespace, logger, **kwargs):
     ingress_data = template_ingress(name, config["baseDnsRecord"], config["ingressAnnotations"], config["suffix"])
     kopf.adopt(ingress_data)
 
-    api = kubernetes.client.CoreV1Api()
-    apps_api = kubernetes.client.AppsV1Api()
-    networking_api = kubernetes.client.NetworkingV1Api()
     # Create the deployment
     deployment_obj = apps_api.create_namespaced_deployment(
         namespace=namespace,
