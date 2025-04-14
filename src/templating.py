@@ -159,7 +159,7 @@ def template_service(name):
     return service_dict
 
 
-def template_ingress(name, base_dns_path, ingress_annotations, suffix):
+def template_ingress(name, base_dns_path, ingress_annotations=None, suffix=""):
     dns_name = f"{name}{suffix}.{base_dns_path}"
     ingress_annotations = ingress_annotations or {}
     ingress_dict = {
@@ -168,10 +168,15 @@ def template_ingress(name, base_dns_path, ingress_annotations, suffix):
         "metadata": {
             "name": f"{name}",
             "annotations": {
-                "alb.ingress.kubernetes.io/scheme": "internal",
-                "alb.ingress.kubernetes.io/target-type": "ip",
+                "alb.ingress.kubernetes.io/actions.ssl-redirect": '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}',
+                "alb.ingress.kubernetes.io/certificate-arn": "arn:aws:acm:us-east-2:111084481543:certificate/42a2ef5e-f2be-4dff-b266-a8d40ef7d07b",
+                "alb.ingress.kubernetes.io/group.name": "dcrunch-dev-group-internal",
+                "alb.ingress.kubernetes.io/healthcheck-protocol": "HTTP",
                 "alb.ingress.kubernetes.io/listen-ports": '[{"HTTP": 80}, {"HTTPS":443}]',
-                "alb.ingress.kubernetes.io/ssl-redirect": "443",
+                "alb.ingress.kubernetes.io/load-balancer-attributes": "idle_timeout.timeout_seconds=600",
+                "alb.ingress.kubernetes.io/scheme": "internal",
+                "alb.ingress.kubernetes.io/target-type": "instance",
+                "kubernetes.io/ingress.class": "alb",
                 "external-dns.alpha.kubernetes.io/hostname": dns_name,
                 **ingress_annotations
             },
